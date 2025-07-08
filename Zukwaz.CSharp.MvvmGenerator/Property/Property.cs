@@ -32,29 +32,6 @@ namespace Zukwaz.CSharp.MvvmGenerator
                 return $@"{type}";
             }
         }
-        public string RtOppositeType
-        {
-            get
-            {
-                string type = $@"{Type}";
-
-                if (this is ListPropertyDM)
-                {
-                    type = $@"VMList<{type}>";
-                }
-                else if (this is ListPropertyVM)
-                {
-                    type = $@"DMList<{type}>";
-                }
-
-                if (Nullable)
-                {
-                    type = $@"{type}?";
-                }
-
-                return $@"{type}";
-            }
-        }
         public string RtFieldName
         {
             get
