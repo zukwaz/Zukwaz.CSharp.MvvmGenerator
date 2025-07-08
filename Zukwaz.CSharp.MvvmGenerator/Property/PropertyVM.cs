@@ -2,6 +2,6 @@
 {
     public abstract class PropertyVM : Property
     {
-        public bool HasDM { set; get; } = false;
+        public string ConvertType { set; get; } = string.Empty;
     }
 }
