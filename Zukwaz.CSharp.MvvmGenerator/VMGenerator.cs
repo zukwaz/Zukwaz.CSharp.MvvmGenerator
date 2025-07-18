@@ -88,25 +88,51 @@ namespace Zukwaz.CSharp.MvvmGenerator
         {
             StringBuilder builder = new StringBuilder();
 
-            string modifier = string.Empty;
-            if (propertyMvvm is ReferencePropertyVM || propertyMvvm is ListPropertyVM)
+            if (propertyMvvm is PropertyVM propertyVM)
             {
-                modifier = $@"private ";
+                string modifier = string.Empty;
+                if (propertyVM is ReferencePropertyVM || propertyVM is ListPropertyVM)
+                {
+                    modifier = $@"private ";
+                }
+
+                builder.AppendLine(Tab(2) + $@"public {propertyVM.RtType} {propertyVM.Name}");
+                builder.AppendLine(Tab(2) + $@"{{");
+                builder.AppendLine(Tab(3) + $@"{modifier}set");
+                builder.AppendLine(Tab(3) + $@"{{");
+                builder.AppendLine(Tab(4) + $@"if ({propertyVM.RtFieldName} != value)");
+                builder.AppendLine(Tab(4) + $@"{{");
+                builder.AppendLine(Tab(5) + $@"{propertyVM.RtFieldName} = value;");
+                builder.AppendLine(Tab(5) + $@"OnPropertyChanged({DQ}{propertyVM.Name}{DQ});");
+                foreach (SubPropertyVM subPropertyVM in propertyVM.SubProperties)
+                {
+                    builder.AppendLine(Tab(5) + $@"OnPropertyChanged({DQ}{subPropertyVM.Name}{DQ});");
+                }
+                builder.AppendLine(Tab(4) + $@"}}");
+                builder.AppendLine(Tab(3) + $@"}}");
+                builder.AppendLine(Tab(3) + $@"get");
+                builder.AppendLine(Tab(3) + $@"{{");
+                builder.AppendLine(Tab(4) + $@"return {propertyVM.RtFieldName};");
+                builder.AppendLine(Tab(3) + $@"}}");
+                builder.AppendLine(Tab(2) + $@"}}");
+
+                foreach (SubPropertyVM subPropertyVM in propertyVM.SubProperties)
+                {
+                    builder.Append(GenerateSubPropertyVM(subPropertyVM));
+                }
             }
 
-            builder.AppendLine(Tab(2) + $@"public {propertyMvvm.RtType} {propertyMvvm.Name}");
+            return builder;
+        }
+        private static StringBuilder GenerateSubPropertyVM(SubPropertyVM subPropertyVM)
+        {
+            StringBuilder builder = new StringBuilder();
+
+            builder.AppendLine(Tab(2) + $@"public {subPropertyVM.RtType} {subPropertyVM.Name}");
             builder.AppendLine(Tab(2) + $@"{{");
-            builder.AppendLine(Tab(3) + $@"{modifier}set");
-            builder.AppendLine(Tab(3) + $@"{{");
-            builder.AppendLine(Tab(4) + $@"if ({propertyMvvm.RtFieldName} != value)");
-            builder.AppendLine(Tab(4) + $@"{{");
-            builder.AppendLine(Tab(5) + $@"{propertyMvvm.RtFieldName} = value;");
-            builder.AppendLine(Tab(5) + $@"OnPropertyChanged({DQ}{propertyMvvm.Name}{DQ});");
-            builder.AppendLine(Tab(4) + $@"}}");
-            builder.AppendLine(Tab(3) + $@"}}");
             builder.AppendLine(Tab(3) + $@"get");
             builder.AppendLine(Tab(3) + $@"{{");
-            builder.AppendLine(Tab(4) + $@"return {propertyMvvm.RtFieldName};");
+            builder.AppendLine(Tab(4) + $@"throw new NotImplementedException();");
             builder.AppendLine(Tab(3) + $@"}}");
             builder.AppendLine(Tab(2) + $@"}}");
 
@@ -130,6 +156,14 @@ namespace Zukwaz.CSharp.MvvmGenerator
             foreach (Property propertyMvvm in classMvvm.Properties)
             {
                 builder.AppendLine(Tab(3) + $@"OnPropertyChanged({DQ}{propertyMvvm.Name}{DQ});");
+
+                if (propertyMvvm is PropertyVM propertyVM)
+                {
+                    foreach (SubPropertyVM subPropertyVM in propertyVM.SubProperties)
+                    {
+                        builder.AppendLine(Tab(3) + $@"OnPropertyChanged({DQ}{subPropertyVM.Name}{DQ});");
+                    }
+                }
             }
             if (classMvvm.Properties.Count == 0)
             {
@@ -214,6 +248,14 @@ namespace Zukwaz.CSharp.MvvmGenerator
             foreach (Property propertyMvvm in classMvvm.Properties)
             {
                 builder.AppendLine(Tab(3) + $@"OnPropertyChanged({DQ}{propertyMvvm.Name}{DQ});");
+
+                if (propertyMvvm is PropertyVM propertyVM)
+                {
+                    foreach (SubPropertyVM subPropertyVM in propertyVM.SubProperties)
+                    {
+                        builder.AppendLine(Tab(3) + $@"OnPropertyChanged({DQ}{subPropertyVM.Name}{DQ});");
+                    }
+                }
             }
             if (classMvvm.Properties.Count == 0)
             {
